@@ -74,6 +74,8 @@ password: ' OR '1'='1
 ![SQL inyection](Imagenes/6.png)
 
 
-
 ## Mitigación de Broken authentication
+
+### Uso de contraseñas cifradas con password_hash
+
 
