@@ -188,3 +188,49 @@ Para añadir MFA (Autenticación Multifactor) al sistema de login, seguiremos es
 
 Accede a la BBDD como hemos hecho al principio de la actividad y modificala de la siguiente forma:
 
+![acceder a la db](Imagenes/17.png)
+
+**🔐 2. login_weak4.php (login + generación del código)**
+
+Crea el archivo [login_weak4.php](Recursos/login_weak4.php) (recuerda cambiar la contraseña):
+
+**🪪 3. mostrar_codigo.php**
+
+Creamos el archivo [mostrar_codigo.php](Recursos/mostrar_codigo.php) con el que visualizaremos el código enviado. Esto simula el ver el código en el email.
+
+Creamos el archivo [verificar_mfa.php](Recursos/verificar_mfa.php) que nos indicará si el código introducido es correcto (recuerda cambiar la contraseña).
+
+🧪 Flujo de prueba
+
+- En login.php, introduces usuario y contraseña.
+
+- Si están bien, se genera un código y vas a mostrar_codigo.php.
+
+![acceder a la db](Imagenes/17.5.png)
+
+![acceder a la db](Imagenes/18.png)
+
+![acceder a la db](Imagenes/19.png)
+
+
+🔒 Flujo completo del Login con MFA
+
+1. Usuario ingresa su usuario y contraseña.
+
+2.  Si las credenciales son correctas, se genera un código OTP y se guarda en la BD.
+
+3. Se envía el código OTP al usuario por correo electrónico (fichero emails_simulados.txt).
+
+4. Usuario ingresa el código OTP en un formulario.
+
+5. El sistema verifica si el código es válido y no ha expirado.
+
+6. Si es correcto, el usuario accede; si no, se muestra un error.
+
+🚀 Beneficios de este Sistema MFA
+
+✔ Mayor seguridad contra accesos no autorizados.
+
+✔ Protege contra ataques de fuerza bruta, incluso si la contraseña es robada.
+
+✔ Fácil de extender a SMS o aplicaciones como Google Authenticator.
