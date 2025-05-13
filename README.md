@@ -78,4 +78,113 @@ password: ' OR '1'='1
 
 ### Uso de contraseñas cifradas con password_hash
 
+La primera aproximación es no guardar las contraseñas en texto, sino aplicarle encriptación o hash que lo hemos visto ya en los contenidos teóricos.
+
+Para almacenar las contraseñas hasheadas, deberemos de modificar la tabla donde guardamos los usuarios, por lo que tenemos que realizar varias operaciones:
+
+1. Accedemos al contenedor de la BBDD y nos conectamos a la base de datos:
+
+![acceder a la db](Imagenes/7.png)
+
+2. Y seleccionamos la BBDD y modificamos la tabla:
+
+![acceder a la db](Imagenes/8.png)
+
+3. Creamos la función [ạdd_user.php](Recursos/add_user.php) para introducir los usuarios con su contraseña hasheada (Debemos cambiar MiContraseña por la de root) y añadimos a un usuario con su contraseña hasheada:
+
+![acceder a la db](Imagenes/9.png)
+
+![acceder a la db](Imagenes/10.png)
+
+Ya creo el usuario, y si lo comprobamos en la db tiene la contraseña hasheada:
+
+![acceder a la db](Imagenes/11.png)
+
+La función **password_hash()** con **PASSWORD_BCRYPT** genera un hash de hasta 60 caracteres, y con **PASSWORD_ARGON2ID**, incluso más (hasta 255). Por eso, se necesita que la columna pueda almacenarlos adecuadamente.
+
+Aplicando mitigaciones de uso de contraseñas con **password_hash** tendríamos el siguiente archivo: [login_weak1.php](Recursos/login_weak1.php):
+
+Como vemos en la siguiente imagen nos da un login exitoso:
+
+![acceder a la db](Imagenes/12.png)
+
+### Uso de consultas preparadas
+
+La siguiente aproximación es usar consultas preparadas, así evitamos ataques de SQL injection.
+
+Creamos el archivo [login_weak2.php](Recursos/login_weak2.php) con el siguiente contenido:
+
+Como vemos, hemos usado consutas paremetrizadas y además hemos utilizado las funciones para manejar las contraseñas hasheadas:
+
+> 🔐 ¿Cómo funciona?
+
+> password_hash($password, PASSWORD_DEFAULT) genera una contraseña hasheada segura.
+
+> password_verify($input, $hash_guardado) verifica si la contraseña ingresada coincide con la almacenada.
+
+### Implementar bloqueo de cuenta tras varios intentos fallidos
+
+Para bloquear la cuenta después de 3 intentos fallidos, podemos hacer lo siguiente:
+
+1. Añadir un campo failed_attempts en la base de datos para contar los intentos fallidos.
+
+2. Registrar el timestamp del último intento fallido con un campo last_attempt para poder restablecer los intentos después de un tiempo.
+
+3. Modificar la lógica del login:
+
+	- Si el usuario tiene 3 intentos fallidos, bloquear la cuenta.
+
+	- Si han pasado, por ejemplo, 15 minutos desde el último intento, restablecer los intentos fallidos.
+
+	- Si el login es exitoso, reiniciar los intentos fallidos a 0.
+
+Modificación en la Base de Datos:
+
+Accede a la BBDD como hemos hecho al principio de la actividad y modificala de la siguiente forma:
+
+![acceder a la db](Imagenes/13.png)
+
+Vemos como se han añadido las columnas indicadas:
+
+![acceder a la db](Imagenes/14.png)
+
+**Código seguro**
+
+Creamos el fichero [login_weak3.php](Recursos/login_weak3.php):
+
+🔍 Qué hace este código:
+
+- Si el usuario tiene 3 fallos y han pasado menos de 15 minutos, la cuenta se bloquea temporalmente.
+- Si han pasado más de 15 minutos, los intentos se reinician automáticamente.
+- Si el login es exitoso, se ponen los intentos a cero y se borra el last_attempt.
+
+![acceder a la db](Imagenes/15.png)
+
+![acceder a la db](Imagenes/16.png)
+
+### Implementar autenticación multifactor (MFA)
+
+Para añadir MFA (Autenticación Multifactor) al sistema de login, seguiremos estos pasos:
+
+> 1. Generar un código de verificación temporal (OTP) de 6 dígitos.
+> 2. Enviar el código OTP al usuario mediante correo electrónico o SMS (en este caso, usaremos correo simulado con una archivo PHP.
+> 3. Crear un formulario para que el usuario ingrese el código OTP después de iniciar sesión.
+> 4. Verificar el código OTP antes de permitir el acceso.
+
+🧩 ¿Qué vamos a crear?
+
+- Modificaciones en la base de datos:
+	- Campos mfa_code (VARCHAR) y mfa_expires (DATETIME).
+
+- Flujo dividido en dos archivos:
+
+	- login_weak4.php: usuario y contraseña → si correctos, se genera el MFA.
+
+	- verificar_mfa.php: el usuario introduce el código que se le muestra.
+
+	- mostrar_codigo.php: archivo que muestra el código generado.
+
+**1. Modificación en la Base de Datos**
+
+Accede a la BBDD como hemos hecho al principio de la actividad y modificala de la siguiente forma:
 
